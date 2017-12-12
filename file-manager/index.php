@@ -2,10 +2,10 @@
 require 'src/FileManager.php';
 
 $dir = new File_Manager;
-$lists = $dir->index();
+$lists = $dir->dirToArray("./");
 if(isset($_GET['dir']) && strlen($_GET['dir']) > 0)
 {
-    $lists = $dir->init($_GET['dir']);
+    $lists = $dir->dirToArray($_GET['dir']);
 }
 ?>
 <!DOCTYPE html>
@@ -21,10 +21,17 @@ if(isset($_GET['dir']) && strlen($_GET['dir']) > 0)
 
 <body>
 <div class="back">
-    <a href="<?= $dir->getString($_SERVER['DOCUMENT_ROOT']); ?>">Root</a>
-    <?php if(isset($_GET['dir'])): ?>
-        <a href="?dir="><?= $_GET['dir']; ?></a>
-    <?php endif; ?>
+    <a href="?dir=">Root</a>
+    <?php if(isset($_GET['dir']))
+    {
+        $crumbs = explode('/', $_GET['dir']);
+        $link = '';
+        foreach ($crumbs as $crumb) {
+            echo '&gt; <a href="?dir=' . $link . '">' . $crumb . '</a>';
+            $link .= $crumb . '/';
+        }
+    }
+    ?>
 </div>
     <table class="table table-striped">
         <thead>

@@ -16,87 +16,48 @@ class File_Manager
         $this->path = str_replace('\\', '/', realpath(dirname(__FILE__) . '/..'));
     }
 
-    public function index($name = '')
+    public function dirToArray($dir)
     {
-        if(strlen($name) > 0)
-        {
-            if (file_exists($name))
-            {
-                $index = [];
-                $sub_dir = [];
-                if (is_dir($name) && $handle = opendir($name))
-                {
-                    while (false !== ($object = readdir($handle)))
-                    {
-                        if ($object != "." && $object != "..")
-                        {
-                            if (is_dir($name . '/'. $object))
-                            {
-                                $type = "directory";
-                                $size = count(glob($name . '/' . $object . '/*'));
-                                $index[] = array(
-                                    "name" => $object,
-                                    "path" => basename($name) . '/' . $object,
-                                    "type" => $type,
-                                    "size" => $size,
-                                    "sub_dir" => $this->index($name . '/' . $object)
-                                );
-                            }
-                            else
-                            {
-                                $type = "file";
-                                $size = @filesize($name . '/' . $object);
-                                $index[] = array(
-                                    "name" => $object,
-                                    "path" => basename($name) . '/' . $object,
-                                    "type" => $type,
-                                    "size" => $size,
-                                    "sub_dir" => $sub_dir
-                                );
-                            }
-                        }
-                    }
-                    closedir($handle);
-                }
-            }
-            return $index;
-        }
-        else
-        {
-            if (file_exists($this->path))
-            {
-                $index = [];
-                $sub_dir = [];
-                if (is_dir($this->path) && $handle = opendir($this->path))
-                {
-                    while (false !== ($object = readdir($handle)))
-                    {
-                        if ($object != "." && $object != "..")
-                        {
-                            if (is_dir($this->path . '/'. $object))
-                            {
-                                $type = "folder";
-                                $size = count(glob($this->path . '/' . $object . '/*'));
-                            }
-                            else
-                            {
-                                $type = "file";
-                                $size = filesize($this->path . '/' . $object);
-                            }
-                            $index[] = array(
-                                "name" => $object,
-                                "path" => $object,
-                                "type" => $type,
-                                "size" => $size,
-                                "sub_dir" => ''
-                            );
-                        }
-                    }
-                    closedir($handle);
-                }
-            }
-            return $index;
-        }
+       $result = [];
+
+       $cdir = scandir($dir); 
+       foreach ($cdir as $key => $value) 
+       { 
+          if (!in_array($value,array('.','..'))) 
+          { 
+             if (is_dir($dir . DIRECTORY_SEPARATOR . $value)) 
+             { 
+                $type = 'folder';
+                $size = count(glob($dir . DIRECTORY_SEPARATOR . $value . '/*'));
+                $path = $dir . DIRECTORY_SEPARATOR . $value;
+                $path = str_replace('./\\', '', $path);
+                $path = str_replace('\\', '/', $path);
+                $result[] = array(
+                    'name' => $value,
+                    'path' => $path,
+                    'type' => $type,
+                    'size' => $size,
+                    'sub_dir' => $this->dirToArray($dir . DIRECTORY_SEPARATOR . $value)
+                );
+             } 
+             else 
+             { 
+                $type = 'file';
+                $size = filesize($dir . DIRECTORY_SEPARATOR . $value);
+                $path = $dir . DIRECTORY_SEPARATOR . $value;
+                $path = str_replace('./\\', '', $path);
+                $path = str_replace('\\', '/', $path);
+                $result[] = array(
+                    'name' => $value,
+                    'path' => $path,
+                    'type' => $type,
+                    'size' => $size,
+                    'sub_dir' => ''
+                );
+             } 
+          } 
+       }
+       return $result; 
     }
 
     public function init($dir = '')
