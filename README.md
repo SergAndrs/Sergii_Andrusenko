@@ -1,4 +1,3 @@
-# Sergii_Andrusenko
-File Manager on php(qwerty)
+# File Manager on php
 
 Simple file manager.
